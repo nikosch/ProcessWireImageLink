@@ -1,0 +1,67 @@
+<?php
+
+
+class InputfieldImageLink extends Inputfield {
+
+  public static function getModuleInfo () {
+  
+    return array (
+        'title'     => __('Inputfield for ImageLink'      , __FILE__)  // Module Title
+      , 'summary'   => __('Adds Inputfield for ImageLink' , __FILE__)  // Module Summary
+      , 'version'   => 2
+      , 'requires'  => array ('FieldtypeImageLink')
+      , 'permanent' => false
+    );
+  }
+
+
+  public function init() {
+
+    parent::init();
+
+    // not sure if all this is needed
+
+    $this->set ('pathToCSS'           , '');
+    $this->set ('resetCSS'            , '');
+    $this->set ('renderLayout'        , '');
+    $this->set ('pathToTemplates'     , '');
+    $this->set ('collapseUnpublished' , '');
+  }
+
+
+  public function ___render() {
+
+    $this->config->scripts->add ($this->config->urls->InputfieldImageLink . "InputfieldImageLink.js");
+
+    $attrs = $this->getAttributes();
+    $value = $attrs['value'];
+
+    unset($attrs['value']);
+
+    $out = sprintf (
+               '<input value="%s" data-page-id="%s" type="hidden" %s />'
+             , htmlspecialchars ($value)
+             , $this->wire ('input')->get ('id')
+             , $this->getAttributesString($attrs)
+           );
+
+    $button = $this->wire ('modules')->get ('InputfieldButton'); 
+    $button->icon  = 'edit';
+    $button->value = 'Change'; 
+    $button->addClass ('ImageLinkButtonEdit'); 
+    $button->attr ('style' , 'margin-bottom:0.8em;'); 
+
+    $out .= $button->render ();
+
+    $button = $this->wire ('modules')->get ('InputfieldButton'); 
+    $button->icon  = 'eraser';
+    $button->value = 'Remove'; 
+    $button->addClass ('ImageLinkButtonErase'); 
+    $button->attr ('style' , 'margin-bottom:0.8em;'); 
+
+    $out .= $button->render ();
+
+    return $out; 
+  }
+}
+

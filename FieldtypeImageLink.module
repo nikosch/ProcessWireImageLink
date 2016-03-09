@@ -1,0 +1,139 @@
+<?php
+
+
+class FieldtypeImageLink extends FieldtypeText {
+
+  public static function getModuleInfo () {
+
+    return array (
+               'title'    => __('ImageLink')
+             , 'summary'  => __('Get a reference to a single image anywhere' , __FILE__)
+             , 'version'  => 2
+             , 'installs' => 'InputfieldImageLink'
+             , 'autoload' => false
+           );
+  }
+
+
+  const outputFormatJson        = 1; 
+  const outputFormatProperties  = 2; 
+  const outputFormatImage       = 10;
+  const outputFormatLiveImage   = 20; 
+
+
+
+  public function init () {
+    parent::init ();
+    $this->allowTextFormatters (false);
+  }
+
+
+  // not sure if this is needed
+
+  public function ready () {
+    parent::ready ();
+  }
+
+
+  public function ___formatValue (Page $page, Field $field, $value) {
+
+    $value = (string) $value; 
+
+    if ((int) $field->outputFormat == self::outputFormatJson) {
+      return $value;
+    }
+
+    $oJSON = json_decode ($value);
+
+    if ((int) $field->outputFormat == self::outputFormatProperties) {
+      return $oJSON;
+    }
+
+    if (null === $oJSON || empty ($oJSON->file)) {
+      // return NULL image
+      $oPageImages = $this->wire (new Pageimages ($page));
+      return $this->wire (new Pageimage ($oPageImages , null));  
+    }
+
+
+    $page = $this->wire ('pages')->get ($oJSON->pageId);
+    $oPageImages = $this->wire (new Pageimages ($page));
+
+    switch ((int) $field->outputFormat) {
+
+      case self::outputFormatLiveImage:
+
+        $oPageImage = $this->wire (new Pageimage ($oPageImages , basename ($oJSON->origin)));
+        
+        if (true == $oJSON->crop) {
+          $oPageImage = $oPageImage->crop (
+              $oJSON->editing->{'crop-x'}
+            , $oJSON->editing->{'crop-y'}
+            , $oJSON->editing->{'crop-w'}
+            , $oJSON->editing->{'crop-h'}
+          );
+          return $oPageImage;
+        } else {
+          return $oPageImage->size ($oJSON->width , $oJSON->height);
+        }
+
+
+      default: // outputFormatImage
+
+        $oPageImage = $this->wire (new Pageimage ($oPageImages , $oJSON->file));
+        $oPageImage = $oPageImage->size ($oJSON->width , $oJSON->height);
+
+        return $oPageImage; 
+    } 
+  }
+
+
+  public function getBlankValue(Page $page, Field $field) {
+    return '';
+  }
+
+ 
+  /**
+   * Get the Inputfield used for input by FieldtypeDemo
+   * 
+   * @param Page $page
+   * @param Field $field
+   * @return Inputfield
+   * 
+   */
+
+  public function getInputfield (Page $page , Field $field) {
+
+    $inputfield = $this->modules->get ('InputfieldImageLink'); 
+    
+    $inputfield->class = $this->className ();
+    $inputfield->attr ('value' , $page->getUnformatted ($field->name)); 
+
+    return $inputfield; 
+  }
+
+
+  public function ___getConfigInputfields (Field $field) {
+
+    $inputfields = parent::___getConfigInputfields($field);
+
+    // output format
+    $f = $this->modules->get('InputfieldRadios'); 
+    $f->attr('name', 'outputFormat'); 
+    $f->label = $this->_('Return value'); 
+    $f->description = $this->_('Select the type of value you want this field to provide when accessed from the API on the front-end of your site.'); 
+
+    $f->notes = $this->_('When output formatting is off, the value is always an processwire image.'); 
+
+    $f->addOption(self::outputFormatJson       , $this->_('image properties as text/JSON')); 
+    $f->addOption(self::outputFormatProperties , $this->_('image properties as PHP stdclass object (json_encode)'));
+    $f->addOption(self::outputFormatImage      , $this->_('processwire image')); 
+    $f->addOption(self::outputFormatLiveImage  , $this->_('processwire image with "live" operation on original file')); 
+
+    $f->attr('value', (int) $field->outputFormat); 
+    $f->collapsed = Inputfield::collapsedBlank;
+    $inputfields->add($f);
+
+    return $inputfields;
+    }
+}

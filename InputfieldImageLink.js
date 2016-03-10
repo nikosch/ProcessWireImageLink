@@ -22,6 +22,7 @@ function ModalImageManager (pageId) {
     , selectors : {
           image           : '#selected_image'
         , captionWrapper  : '#wrap_caption'
+        , linkWrapper     : '#wrap_link_original'
         , cbLink          : '#selected_image_link'
         , cbHiDpi         : '#selected_image_hidpi'
         , cbCaption       : '#selected_image_caption'
@@ -31,15 +32,15 @@ function ModalImageManager (pageId) {
       }
 
     , titles : {
-          select : '<i class="fa fa-fw fa-folder-open"></i> '     + ProcessWire.config.InputfieldCKEditor.pwimage.selectLabel // 'Select Image'
-        , saving : '<i class="fa fa-fw fa-spin fa-spinner"></i> ' + ProcessWire.config.InputfieldCKEditor.pwimage.savingNote  // Saving Image
+          select : '<i class="fa fa-fw fa-folder-open"></i> '     + ProcessWire.config.InputfieldImageLink.pwimage.selectLabel // 'Select Image'
+        , saving : '<i class="fa fa-fw fa-spin fa-spinner"></i> ' + ProcessWire.config.InputfieldImageLink.pwimage.savingNote  // Saving Image
         , image  : '<i class="fa fa-fw fa-picture-o"></i> ' 
       }
 
     , buttons : {
-          insert : '<i class="fa fa-camera"></i> '       + ProcessWire.config.InputfieldCKEditor.pwimage.insertBtn  // 'Insert This Image'
-        , select : '<i class="fa fa-folder-open"></i> '  + ProcessWire.config.InputfieldCKEditor.pwimage.selectBtn  // 'Select Another Image'
-        , cancel : '<i class="fa fa-times-circle"></i> ' + ProcessWire.config.InputfieldCKEditor.pwimage.cancelBtn  // 'Cancel'
+          insert : '<i class="fa fa-camera"></i> '       + ProcessWire.config.InputfieldImageLink.pwimage.insertBtn  // 'Insert This Image'
+        , select : '<i class="fa fa-folder-open"></i> '  + ProcessWire.config.InputfieldImageLink.pwimage.selectBtn  // 'Select Another Image'
+        , cancel : '<i class="fa fa-times-circle"></i> ' + ProcessWire.config.InputfieldImageLink.pwimage.cancelBtn  // 'Cancel'
       }
   };
 }
@@ -103,6 +104,7 @@ ModalImageManager.prototype = {
         var that = this;
 
         that.iframeContent.find (this.config.selectors.captionWrapper).hide ();
+        that.iframeContent.find (this.config.selectors.linkWrapper).hide ();
 
         var buttonInsert =  {
 
@@ -333,6 +335,20 @@ ModalImageManager.prototype = {
         var pageId = fooField.data ('page-id');
 
 
+        var magnificOptions = {
+            type                : 'image'
+          , closeOnContentClick : true
+          , closeBtnInside      : true
+          , image               : {
+              titleSrc: 'title'
+            }
+          , callbacks           : {
+              open: function() {
+                // for firefox, which launches Magnific after a sort
+                if ($(".InputfieldFileJustSorted").size () > 0) this.close ();
+              }
+            }
+        };  
 
         var imageManager = new ModalImageManager (pageId);
 
@@ -348,11 +364,25 @@ ModalImageManager.prototype = {
           return true;
         };
 
-        this.jButtonEdit.add (this.jPreviewContainer).click (function () {
+        this.jButtonEdit
+        //.add (this.jPreviewContainer)
+        .click (function () {
           imageManager.init (fooField.data ('image-data'));
         });
 
 
+        this.jPreviewContainer.click (function() {
+          var options = magnificOptions;
+          var imageProperties = fooField.data ('image-data');
+          options['items'] = { 
+              src   : imageProperties.src 
+            , title : '' 
+          };
+          $.magnificPopup.open (options, 0);
+          return false;
+        });
+ 
+ 
         this.jButtonErase.click (function () {
 
           that.jInput

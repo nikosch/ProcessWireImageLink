@@ -309,10 +309,12 @@ ModalImageManager.prototype = {
         if (imageProperties.file) {
           var cropping = this.parseCropping (imageProperties.file);
           
-          imageProperties.editing['crop-x'] = cropping['crop-x'];
-          imageProperties.editing['crop-y'] = cropping['crop-y'];
-          imageProperties.editing['crop-w'] = cropping['crop-w'];
-          imageProperties.editing['crop-h'] = cropping['crop-h'];
+          if (cropping.crop) {
+            imageProperties.editing['crop-x'] = cropping['crop-x'];
+            imageProperties.editing['crop-y'] = cropping['crop-y'];
+            imageProperties.editing['crop-w'] = cropping['crop-w'];
+            imageProperties.editing['crop-h'] = cropping['crop-h'];
+          }
         }
 
         return imageProperties;
@@ -324,15 +326,15 @@ ModalImageManager.prototype = {
 
 (function ($) {
 
-    function InputfieldImageLinkProcessor (fooField) {
+    function InputfieldImageLinkProcessor (jInput) {
 
         var that = this;
 
-        this.getUIElements (fooField);
+        this.getUIElements (jInput);
         this.preparePreviewContainer ();
         this.init ();
 
-        var pageId = fooField.data ('page-id');
+        var pageId = jInput.data ('page-id');
 
 
         var magnificOptions = {
@@ -342,12 +344,12 @@ ModalImageManager.prototype = {
           , image               : {
               titleSrc: 'title'
             }
+          /*
           , callbacks           : {
               open: function() {
-                // for firefox, which launches Magnific after a sort
-                if ($(".InputfieldFileJustSorted").size () > 0) this.close ();
               }
             }
+          */
         };  
 
         var imageManager = new ModalImageManager (pageId);
@@ -367,13 +369,13 @@ ModalImageManager.prototype = {
         this.jButtonEdit
         //.add (this.jPreviewContainer)
         .click (function () {
-          imageManager.init (fooField.data ('image-data'));
+          imageManager.init (jInput.data ('image-data'));
         });
 
 
         this.jPreviewContainer.click (function() {
           var options = magnificOptions;
-          var imageProperties = fooField.data ('image-data');
+          var imageProperties = jInput.data ('image-data');
           options['items'] = { 
               src   : imageProperties.src 
             , title : '' 
@@ -395,7 +397,7 @@ ModalImageManager.prototype = {
         });
 
 
-        this.updatePreview (fooField.data ('image-data'));
+        this.updatePreview (jInput.data ('image-data'));
     }
 
 
@@ -419,11 +421,13 @@ ModalImageManager.prototype = {
 
       , preparePreviewContainer : function () {
 
+            // alright, this is messy
+            
             this.jPreviewContainer = $(
                     '<div class="InputfieldImageGrid" style="cursor:pointer;display:inline-block;vertical-align: bottom;">'
                     +  '<ul class="InputfieldFileList ui-helper-clearfix ui-sortable">' 
                     +     '<li class="InputfieldFileItem InputfieldImage ui-widget InputfieldFileItemExisting">'
-                    +       '<div class="InputfieldImagePreview" style="background: no-repeat scroll center center / cover rgb(0, 0, 0); width: 100px; height: 100px;">'
+                    +       '<div class="InputfieldImagePreview" style="background: no-repeat scroll center center / cover rgb(255, 255, 255); width: 100px; height: 100px;">'
                     +         '<img style="max-width:100%;display:none;" src="">'
                     +         '<span style="color:#888;padding:2px;background:rgba(255,255,255,.6)"></span>'
                     +       '</div>'
@@ -465,7 +469,7 @@ ModalImageManager.prototype = {
 
 
 
-  jQuery (document).ready(function($) {
+  jQuery (document).ready (function ($) {
 
     jQuery("input.FieldtypeImageLink").each (function (n) {
       new InputfieldImageLinkProcessor ($(this));

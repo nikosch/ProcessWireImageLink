@@ -29,6 +29,42 @@ class InputfieldImageLink extends Inputfield {
   }
 
 
+
+  public function renderReady (Inputfield $parent = null , $renderValueMode = false) {
+
+    static $loaded = false;
+
+    if (! $loaded) {
+      $this->wire('modules')->get ('JqueryCore'); // required by jQuery UI
+      $this->wire('modules')->get ('JqueryUI');  
+      $this->wire('modules')->get ('JqueryUI')->use ('modal');
+      $this->modules->getInstall ('JqueryMagnific'); 
+      $loaded = true;
+    }
+    
+    $this->globalConfig (); 
+    return parent::renderReady ($parent, $renderValueMode);
+  } 
+
+
+  protected function globalConfig () {
+
+    $settings = array (
+                  'pwimage' => array (
+                       'selectLabel'  => $this->_('Select Image')
+                     , 'editLabel'    => $this->_('Edit Image')
+                     , 'captionLabel' => $this->_('Your caption text here')
+                     , 'savingNote'   => $this->_('Saving Image')
+                     , 'cancelBtn'    => $this->_('Cancel')
+                     , 'insertBtn'    => $this->_('Insert Image')
+                     , 'selectBtn'    => $this->_('Select Another')
+                  )
+    ); 
+
+    $this->wire('config')->js ($this->className () , $settings); 
+  }
+ 
+  
   public function ___render() {
 
     $this->config->scripts->add ($this->config->urls->InputfieldImageLink . "InputfieldImageLink.js");

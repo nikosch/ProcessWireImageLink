@@ -50,9 +50,10 @@ class FieldtypeImageLink extends FieldtypeText {
     }
 
     if (null === $oJSON || empty ($oJSON->file)) {
+      return null;
       // return NULL image
-      $oPageImages = $this->wire (new Pageimages ($page));
-      return $this->wire (new Pageimage ($oPageImages , null));  
+      // $oPageImages = $this->wire (new Pageimages ($page));
+      // return $this->wire (new Pageimage ($oPageImages , null));  
     }
 
 

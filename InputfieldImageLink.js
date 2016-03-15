@@ -369,7 +369,7 @@ ModalImageManager.prototype = {
         this.jButtonEdit
         //.add (this.jPreviewContainer)
         .click (function () {
-          imageManager.init (jInput.data ('image-data'));
+           imageManager.init (jInput.data ('image-data'));
         });
 
 
@@ -398,6 +398,7 @@ ModalImageManager.prototype = {
 
 
         this.updatePreview (jInput.data ('image-data'));
+        return this;
     }
 
 
@@ -465,16 +466,26 @@ ModalImageManager.prototype = {
             this.jButtonErase.hide ();
           }
         }
-    }
-
+    };
 
 
   jQuery (document).ready (function ($) {
 
-    jQuery("input.FieldtypeImageLink").each (function (n) {
-      new InputfieldImageLinkProcessor ($(this));
+    var registerHandlers = function (container) {
+      if ('undefined' == typeof container.data ('processor')) {
+        container.data ('processor' , new InputfieldImageLinkProcessor (container));
+      }
+    };
+
+    jQuery("input.FieldtypeImageLink").each (function () {
+      registerHandlers ($(this));
     });
 
+    $(document).on('reloaded' , '.InputfieldRepeater' , function () {
+      jQuery("input.FieldtypeImageLink").each (function () {
+        registerHandlers ($(this));
+      });
+    });
   }); 
 
 })(jQuery);

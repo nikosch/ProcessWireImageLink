@@ -52,8 +52,8 @@ class FieldtypeImageLink extends FieldtypeText {
     if (null === $oJSON || empty ($oJSON->file)) {
       return null;
       // return NULL image
-      // $oPageImages = $this->wire (new Pageimages ($page));
-      // return $this->wire (new Pageimage ($oPageImages , null));  
+      $oPageImages = $this->wire (new Pageimages ($page));
+      return $this->wire (new Pageimage ($oPageImages , null));  
     }
 
 
@@ -64,7 +64,7 @@ class FieldtypeImageLink extends FieldtypeText {
 
       case self::outputFormatLiveImage:
 
-        $oPageImage = $this->wire (new Pageimage ($oPageImages , basename ($oJSON->origin)));
+        $oPageImage = $page->filesManager->getFile (basename ($oJSON->origin));
         
         if (true == $oJSON->crop) {
           $oPageImage = $oPageImage->crop (
@@ -81,7 +81,8 @@ class FieldtypeImageLink extends FieldtypeText {
 
       default: // outputFormatImage
 
-        $oPageImage = $this->wire (new Pageimage ($oPageImages , $oJSON->file));
+
+        $oPageImage = $page->filesManager->getFile ($oJSON->file);
         $oPageImage = $oPageImage->size ($oJSON->width , $oJSON->height);
 
         return $oPageImage; 

@@ -47,10 +47,12 @@ function ModalImageManager (pageId) {
 
 ModalImageManager.prototype = {
 
-    init : function (imageProperties) {
+    init : function (imageProperties, startpage) {
 
       if (imageProperties) {
         this.pageId = imageProperties.pageId;
+      } else if (startpage) {
+        this.pageId = startpage
       }
 
       var that       = this;
@@ -369,7 +371,7 @@ ModalImageManager.prototype = {
         this.jButtonEdit
         //.add (this.jPreviewContainer)
         .click (function () {
-           imageManager.init (jInput.data ('image-data'));
+           imageManager.init (jInput.data ('image-data'), $(this).data('startpage'));
         });
 
 
@@ -427,8 +429,8 @@ ModalImageManager.prototype = {
             this.jPreviewContainer = $(
                     '<div class="InputfieldImageGrid" style="cursor:pointer;display:inline-block;vertical-align: bottom;">'
                     +  '<ul class="InputfieldFileList ui-helper-clearfix ui-sortable">' 
-                    +     '<li class="InputfieldFileItem InputfieldImage ui-widget InputfieldFileItemExisting">'
-                    +       '<div class="InputfieldImagePreview" style="background: no-repeat scroll center center / cover rgb(255, 255, 255); width: 100px; height: 100px;">'
+                    +     '<li class="InputfieldFileItem InputfieldImage ui-widget InputfieldFileItemExisting" style="margin-right: 1.5em;">'
+                    +       '<div class="InputfieldImagePreview" style="margin: 10px; background: no-repeat scroll center center / contain rgb(255, 255, 255); width: 150px; height: 150px;">'
                     +         '<img style="max-width:100%;display:none;" src="">'
                     +         '<span style="color:#888;padding:2px;background:rgba(255,255,255,.6)"></span>'
                     +       '</div>'

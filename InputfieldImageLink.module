@@ -14,8 +14,16 @@ class InputfieldImageLink extends Inputfield {
     );
   }
 
+  protected static $defaultConfig = array(
+    'startpage' => 0
+    ); 
 
   public function init() {
+
+    foreach(self::$defaultConfig as $key => $value) {
+      $this->set($key, $value);
+    }
+    $this->attr('value', $this->wire('pages')->newPageArray()); 
 
     parent::init();
 
@@ -63,6 +71,26 @@ class InputfieldImageLink extends Inputfield {
 
     $this->wire('config')->js ($this->className () , $settings); 
   }
+
+  public function ___getConfigInputfields () {
+
+    $inputfields = parent::___getConfigInputfields();
+
+    // default image page
+    $f = $this->modules->get('InputfieldPageListSelect'); 
+    $f->attr('name', 'startpage'); 
+    $f->label = $this->_('Default image page'); 
+    $f->attr('value', (int) $this->startpage); 
+    $f->description = $this->_('Select a default page for the image picker.'); 
+    $f->notes = $this->_('When empty, the default page is the currently edited page'); 
+    $f->required = false;
+    $inputfields->add($f);
+
+    return $inputfields; 
+    }
+
+
+    
  
   
   public function ___render() {
@@ -83,15 +111,19 @@ class InputfieldImageLink extends Inputfield {
 
     $button = $this->wire ('modules')->get ('InputfieldButton'); 
     $button->icon  = 'edit';
-    $button->value = 'Change'; 
-    $button->addClass ('ImageLinkButtonEdit'); 
+    $button->value = $this->_('Change'); 
+    $button->addClass ('ImageLinkButtonEdit');
     $button->attr ('style' , 'margin-bottom:0.8em;'); 
+
+    if ($this->startpage) {
+      $button->attr ('data-startpage', $this->startpage);   
+    }
 
     $out .= $button->render ();
 
     $button = $this->wire ('modules')->get ('InputfieldButton'); 
     $button->icon  = 'eraser';
-    $button->value = 'Remove'; 
+    $button->value = $this->_('Remove'); 
     $button->addClass ('ImageLinkButtonErase'); 
     $button->attr ('style' , 'margin-bottom:0.8em;'); 
 

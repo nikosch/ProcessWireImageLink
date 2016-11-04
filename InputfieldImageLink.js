@@ -47,10 +47,12 @@ function ModalImageManager (pageId) {
 
 ModalImageManager.prototype = {
 
-    init : function (imageProperties) {
+    init : function (imageProperties, startpage) {
 
       if (imageProperties) {
         this.pageId = imageProperties.pageId;
+      } else if (startpage) {
+        this.pageId = startpage
       }
 
       var that       = this;
@@ -369,7 +371,7 @@ ModalImageManager.prototype = {
         this.jButtonEdit
         //.add (this.jPreviewContainer)
         .click (function () {
-           imageManager.init (jInput.data ('image-data'));
+           imageManager.init (jInput.data ('image-data'), $(this).data('startpage'));
         });
 
 
